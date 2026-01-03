@@ -34,6 +34,12 @@ on post-fs-data
     chown wifi wifi /sys/wifi/mac_addr
     chmod 0640 /sys/wifi/mac_addr
 
+    # for WIFI Manufacturer Mode
+    chown wifi wifi /sys/module/dhd/parameters/firmware_path
+    chmod 0640 /sys/module/dhd/parameters/firmware_path
+    chown wifi wifi /sys/module/dhd/parameters/nvram_path
+    chmod 0640 /sys/module/dhd/parameters/nvram_path
+
 on boot
     setprop wifi.interface wlan0
 

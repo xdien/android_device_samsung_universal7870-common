@@ -1,0 +1,7 @@
+# A600FJXU9CVB1
+
+# gatekeeper
+-vendor/lib/hw/gatekeeper.exynos7870.so
+
+
+

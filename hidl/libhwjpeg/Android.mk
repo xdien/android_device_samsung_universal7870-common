@@ -19,7 +19,7 @@ include $(CLEAR_VARS)
 
 LOCAL_CFLAGS += -DLOG_TAG=\"exynos-libhwjpeg\"
 
-LOCAL_SHARED_LIBRARIES := liblog libutils libcutils libion_exynos libgiantmscl
+LOCAL_SHARED_LIBRARIES := liblog libutils libcutils libion
 LOCAL_HEADER_LIBRARIES := libcutils_headers libsystem_headers libhardware_headers libexynos_headers
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
@@ -27,7 +27,7 @@ LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
 
 LOCAL_SRC_FILES := hwjpeg-base.cpp hwjpeg-v4l2.cpp ExynosJpegEncoder.cpp \
                    LibScalerForJpeg.cpp AppMarkerWriter.cpp ExynosJpegEncoderForCamera.cpp \
-                   libhwjpeg-exynos.cpp ThumbnailScaler.cpp GiantThumbnailScaler.cpp
+                   libhwjpeg-exynos.cpp ThumbnailScaler.cpp
 
 LOCAL_MODULE := libhwjpeg
 LOCAL_MODULE_TAGS := optional

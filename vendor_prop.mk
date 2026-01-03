@@ -70,8 +70,13 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # secril
 PRODUCT_PROPERTY_OVERRIDES += \
-   vendor.sec.rild.libpath=/vendor/lib64/libsec-ril.so \
-   vendor.sec.rild.libpath2=/vendor/lib64/libsec-ril-dsds.so
+   vendor.sec.rild.libpath=/vendor/lib/libsec-ril.so \
+   vendor.sec.rild.libpath2=/vendor/lib/libsec-ril-dsds.so
+
+# Graphics
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.hardware.egl=mali \
+    ro.hardware.vulkan=mali
 
 #Treble
 PRODUCT_PROPERTY_OVERRIDES += \

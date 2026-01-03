@@ -1,0 +1,9 @@
+# A600FJXU9CVB1
+# Keystore & Keymaster
+-vendor/lib/hw/keystore.mdfpp.so
+-vendor/lib/libkeymaster2_mdfpp.so
+-vendor/lib/libskeymaster3device.so
+-vendor/lib/libkeymaster_helper_vendor.so
+
+
+

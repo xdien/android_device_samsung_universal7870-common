@@ -18,18 +18,18 @@
 
 #include "ThumbnailScaler.h"
 #include "LibScalerForJpeg.h"
-#include "GiantThumbnailScaler.h"
+// #include "GiantThumbnailScaler.h"
 
 ThumbnailScaler *ThumbnailScaler::createInstance()
 {
-    GiantThumbnailScaler *scaler = new GiantThumbnailScaler();
-    if (scaler->available()) {
-        ALOGD("Created thumbnail scaler: GiantMscl");
-        return scaler;
-    }
-
-    delete scaler;
+    // GiantThumbnailScaler *scaler = new GiantThumbnailScaler();
+    // if (scaler->available()) {
+    //     ALOGD("Created thumbnail scaler: GiantMscl");
+    //     return scaler;
+    // }
+    // delete scaler;
 
     ALOGD("Created thumbnail scaler: legacy V4L2 Scaler");
     return new LibScalerForJpeg();
+
 }

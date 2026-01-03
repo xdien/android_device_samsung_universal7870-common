@@ -77,7 +77,7 @@ PRODUCT_PACKAGES += \
 
 # Audio
 PRODUCT_PACKAGES += \
-    android.hardware.audio@2.0-service \
+    android.hardware.audio.service \
     android.hardware.audio@5.0-impl \
     android.hardware.audio.effect@5.0-impl \
     android.hardware.soundtrigger@2.2-impl \
@@ -94,9 +94,12 @@ else ifeq ($(TARGET_DEVICE_HAS_SEC_AUDIO_HAL),true)
 #PRODUCT_PACKAGES += \
 #    libaudioroute_sec_helper    
 else
-ifeq ($(TARGET_DEVICE_HAS_OSS_AUDIO_HAL),true)
 PRODUCT_PACKAGES += \
     audio.primary.exynos7870
+
+ifeq ($(TARGET_DEVICE_HAS_OSS_AUDIO_HAL),true)
+# PRODUCT_PACKAGES += \
+#    audio.primary.exynos7870
 ifeq ($(TARGET_DEVICE_HAS_TFA_AMP),true)
 PRODUCT_PACKAGES += \
     audio_amplifier.exynos7870 \
@@ -191,9 +194,7 @@ PRODUCT_COPY_FILES += \
 
 # VNDK prebuilts
 PRODUCT_COPY_FILES += \
-    prebuilts/vndk/v29/arm64/arch-arm64-armv8-a/shared/vndk-core/libprotobuf-cpp-lite.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libprotobuf-cpp-lite-v29.so \
     prebuilts/vndk/v29/arm64/arch-arm-armv8-a/shared/vndk-core/libprotobuf-cpp-lite.so:$(TARGET_COPY_OUT_VENDOR)/lib/libprotobuf-cpp-lite-v29.so \
-    prebuilts/vndk/v29/arm64/arch-arm64-armv8-a/shared/vndk-core/libprotobuf-cpp-full.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libprotobuf-cpp-full-v29.so \
     prebuilts/vndk/v29/arm64/arch-arm-armv8-a/shared/vndk-core/libprotobuf-cpp-full.so:$(TARGET_COPY_OUT_VENDOR)/lib/libprotobuf-cpp-full-v29.so
 
 # Cas
@@ -215,20 +216,20 @@ PRODUCT_PACKAGES += \
     libion \
     libtinyxml
 
-ifeq ($(TARGET_DEVICE_HAS_SAMSUNG_SLSI_EXYNOS7870),true)
-# only for prebuilt bsp running on arm hwcomposer
-PRODUCT_PACKAGES += \
-    android.hardware.graphics.composer@2.1-service.universal7870
-else
+# ifeq ($(TARGET_DEVICE_HAS_SAMSUNG_SLSI_EXYNOS7870),true)
+# # only for prebuilt bsp running on arm hwcomposer
+# PRODUCT_PACKAGES += \
+#    android.hardware.graphics.composer@2.1-service.universal7870
+# else
 PRODUCT_PACKAGES += \
     android.hardware.graphics.composer@2.1-service
-endif
+# endif
     
 # Memtrack
 PRODUCT_PACKAGES += \
-    android.hardware.memtrack@1.0-impl \
-    android.hardware.memtrack@1.0-service \
-    memtrack.exynos7870
+   android.hardware.memtrack@1.0-impl \
+   android.hardware.memtrack@1.0-service \
+   memtrack.exynos7870
 
 # Configstore
 PRODUCT_PACKAGES += \
@@ -403,8 +404,8 @@ PRODUCT_COPY_FILES += \
 
 # Sensors
 PRODUCT_PACKAGES += \
-    android.hardware.sensors@1.0-service.universal7870 \
-    android.hardware.sensors@1.0-impl.universal7870 \
+#    android.hardware.sensors@1.0-service \
+    android.hardware.sensors@1.0-impl \
     libsensorndkbridge \
     libshim_sensorndkbridge
 
@@ -429,10 +430,23 @@ PRODUCT_PACKAGES += \
     vendor.lineage.trust@1.0-service
 
 # Shims
+# PRODUCT_PACKAGES += \
+#     libexynoscamera_shim \
+#     libstagefright_shim \
+#     libcutils_shim_vendor
+
+# WiFi
 PRODUCT_PACKAGES += \
-    libexynoscamera_shim \
-    libstagefright_shim \
-    libcutils_shim_vendor
+    android.hardware.wifi@1.0-service.legacy \
+    hostapd \
+    wpa_supplicant \
+    wpa_supplicant.conf
+
+# Graphics
+# PRODUCT_PACKAGES += \
+#     gralloc.exynos7870 \
+#     libion_exynos \
+#     libgiantmscl
 
 # USB
 PRODUCT_PACKAGES += \
@@ -467,3 +481,67 @@ $(call inherit-product, frameworks/native/build/phone-xhdpi-2048-dalvik-heap.mk)
 
 # call the proprietary setup
 $(call inherit-product, vendor/samsung/universal7870-common/universal7870-common-vendor.mk)
+# Manually added blobs for 32-bit compatibility
+PRODUCT_COPY_FILES += \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libion_exynos.so:$(TARGET_COPY_OUT_VENDOR)/lib/libion_exynos.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libgiantmscl.so:$(TARGET_COPY_OUT_VENDOR)/lib/libgiantmscl.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/gralloc.exynos7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/gralloc.exynos7870.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/android.hardware.sensors@1.0-impl.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/android.hardware.sensors@1.0-impl.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/android.hardware.graphics.composer@2.1-impl.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/android.hardware.graphics.composer@2.1-impl.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/hwcomposer.exynos7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/hwcomposer.exynos7870.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libhwc2on1adapter.so:$(TARGET_COPY_OUT_VENDOR)/lib/libhwc2on1adapter.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libexynosutils.so:$(TARGET_COPY_OUT_VENDOR)/lib/libexynosutils.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libvndsecril-client.so:$(TARGET_COPY_OUT_VENDOR)/lib/libvndsecril-client.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libaudio-ril.so:$(TARGET_COPY_OUT_VENDOR)/lib/libaudio-ril.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libfloatingfeature.so:$(TARGET_COPY_OUT_VENDOR)/lib/libfloatingfeature.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libsecnativefeature.so:$(TARGET_COPY_OUT_VENDOR)/lib/libsecnativefeature.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libstdc++.so:$(TARGET_COPY_OUT_VENDOR)/lib/libstdc++.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libexynosv4l2.so:$(TARGET_COPY_OUT_VENDOR)/lib/libexynosv4l2.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libexynosscaler.so:$(TARGET_COPY_OUT_VENDOR)/lib/libexynosscaler.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libexynosgscaler.so:$(TARGET_COPY_OUT_VENDOR)/lib/libexynosgscaler.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libGrallocWrapper.so:$(TARGET_COPY_OUT_VENDOR)/lib/libGrallocWrapper.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libhwcutils.so:$(TARGET_COPY_OUT_VENDOR)/lib/libhwcutils.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libexynosdisplay.so:$(TARGET_COPY_OUT_VENDOR)/lib/libexynosdisplay.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libhdmi.so:$(TARGET_COPY_OUT_VENDOR)/lib/libhdmi.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libvirtualdisplay.so:$(TARGET_COPY_OUT_VENDOR)/lib/libvirtualdisplay.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libmpp.so:$(TARGET_COPY_OUT_VENDOR)/lib/libmpp.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libExynosHWCService.so:$(TARGET_COPY_OUT_VENDOR)/lib/libExynosHWCService.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/firmware/bcm4345C5_V0069.0172.hcd:$(TARGET_COPY_OUT_VENDOR)/firmware/BCM4345C5.hcd \
+    vendor/samsung/universal7870-common/proprietary/vendor/bin/hw/macloader:$(TARGET_COPY_OUT_VENDOR)/bin/hw/macloader \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/vendor.samsung.hardware.wifi@2.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/vendor.samsung.hardware.wifi@2.0.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/sensors.universal7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/sensors.universal7870.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/sensors.universal7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/sensors.exynos7870.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libwifi-hal.so:$(TARGET_COPY_OUT_VENDOR)/lib/libwifi-hal.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/bin/hw/android.hardware.sensors@1.0-service:$(TARGET_COPY_OUT_VENDOR)/bin/hw/android.hardware.sensors@1.0-service \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/init/android.hardware.sensors@1.0-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/android.hardware.sensors@1.0-service.rc \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/bcmdhd_clm.blob:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/bcmdhd_clm.blob \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/indoorchannel.info:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/indoorchannel.info \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/wpa_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_supplicant_overlay.conf \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/p2p_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/p2p_supplicant_overlay.conf \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/bcmdhd_sta.bin_c5:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/bcmdhd_sta.bin_c5 \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/bcmdhd_apsta.bin_c5:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/bcmdhd_apsta.bin_c5 \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/bcmdhd_mfg.bin_c5:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/bcmdhd_mfg.bin_c5 \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/nvram.txt_c5:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/nvram.txt_c5 \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/nvram.txt_c5:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/nvram.net.txt \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/bcmdhd_sta.bin_c5_blob:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/bcmdhd_sta.bin_c5_blob \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/bcmdhd_apsta.bin_c5_blob:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/bcmdhd_apsta.bin_c5_blob \
+    vendor/samsung/universal7870-common/proprietary/vendor/etc/wifi/bcmdhd_mfg.bin_c5_blob:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/bcmdhd_mfg.bin_c5_blob
+
+# Clean up properties
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    ro.adb.secure=0 \
+    ro.secure=0 \
+    ro.debuggable=1 \
+    debug.hwc.force_gpu=1 \
+    ro.surface_flinger.protected_contents=false \
+    ro.surface_flinger.has_wide_color_display=false \
+    ro.surface_flinger.use_color_management=false \
+    ro.surface_flinger.has_HDR_display=false \
+    debug.sf.enable_hwc_vds=0 \
+    debug.sf.latch_unsignaled=1 \
+    debug.egl.swapinterval=0 \
+    debug.sf.disable_client_composition_cache=1 \
+    debug.sf.disable_hwc_overlays=1 \
+    debug.renderengine.backend=threaded \
+    ro.control_privapp_permissions=disable \
+    debug.hwui.renderer=skiagl

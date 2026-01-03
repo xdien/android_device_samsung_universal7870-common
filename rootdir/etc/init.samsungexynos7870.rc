@@ -2,8 +2,93 @@ on early-init
     mkdir /mnt/vendor/efs 0771 radio system
     mount debugfs /sys/kernel/debug /sys/kernel/debug
 
+    # Schedtune disabled - causing mount conflicts and service failures
+    # mkdir /dev/stune
+    # mount cgroup none /dev/stune schedtune
+    # mkdir /dev/stune/foreground
+    # mkdir /dev/stune/background
+    # mkdir /dev/stune/top-app
+    # mkdir /dev/stune/rt
+    # chown system system /dev/stune
+    # chown system system /dev/stune/foreground
+    # chown system system /dev/stune/background
+    # chown system system /dev/stune/top-app
+    # chown system system /dev/stune/rt
+    # chown system system /dev/stune/tasks
+    # chown system system /dev/stune/foreground/tasks
+    # chown system system /dev/stune/background/tasks
+    # chown system system /dev/stune/top-app/tasks
+    # chown system system /dev/stune/rt/tasks
+    # chmod 0664 /dev/stune/tasks
+    # chmod 0664 /dev/stune/foreground/tasks
+    # chmod 0664 /dev/stune/background/tasks
+    # chmod 0664 /dev/stune/top-app/tasks
+    # chmod 0664 /dev/stune/rt/tasks
 on init
     start watchdogd
+
+    # Stune moved to early-init
+    
+    mkdir /dev/cpuset
+    mount cgroup none /dev/cpuset cpuset
+    write /dev/cpuset/cpus 0-7
+    write /dev/cpuset/mems 0
+
+    mkdir /dev/cpuset/foreground
+    write /dev/cpuset/foreground/cpus 0-7
+    write /dev/cpuset/foreground/mems 0
+
+    mkdir /dev/cpuset/background
+    write /dev/cpuset/background/cpus 0-1
+    write /dev/cpuset/background/mems 0
+
+    mkdir /dev/cpuset/system-background
+    write /dev/cpuset/system-background/cpus 0-3
+    write /dev/cpuset/system-background/mems 0
+
+    mkdir /dev/cpuset/top-app
+    write /dev/cpuset/top-app/cpus 0-7
+    write /dev/cpuset/top-app/mems 0
+
+    mkdir /dev/cpuset/restricted
+    write /dev/cpuset/restricted/cpus 0-3
+    write /dev/cpuset/restricted/mems 0
+
+    mkdir /dev/cpuset/camera-daemon
+    write /dev/cpuset/camera-daemon/cpus 0-7
+    write /dev/cpuset/camera-daemon/mems 0
+
+    chown system system /dev/cpuset
+    chown system system /dev/cpuset/foreground
+    chown system system /dev/cpuset/background
+    chown system system /dev/cpuset/system-background
+    chown system system /dev/cpuset/top-app
+    chown system system /dev/cpuset/restricted
+    chown system system /dev/cpuset/camera-daemon
+    chown system system /dev/cpuset/tasks
+    chown system system /dev/cpuset/foreground/tasks
+    chown system system /dev/cpuset/background/tasks
+    chown system system /dev/cpuset/system-background/tasks
+    chown system system /dev/cpuset/top-app/tasks
+    chown system system /dev/cpuset/restricted/tasks
+    chown system system /dev/cpuset/camera-daemon/tasks
+    chmod 0664 /dev/cpuset/tasks
+    chmod 0664 /dev/cpuset/foreground/tasks
+    chmod 0664 /dev/cpuset/background/tasks
+    chmod 0664 /dev/cpuset/system-background/tasks
+    chmod 0664 /dev/cpuset/top-app/tasks
+    chmod 0664 /dev/cpuset/restricted/tasks
+    chmod 0664 /dev/cpuset/camera-daemon/tasks
+
+    # Fix SF PDX sockets for SurfaceFlinger
+    mkdir /dev/socket/pdx 0775 system system
+    mkdir /dev/socket/pdx/system 0775 system system
+    mkdir /dev/socket/pdx/system/buffer_hub 0775 system system
+    mkdir /dev/socket/pdx/system/performance 0775 system system
+    mkdir /dev/socket/pdx/system/vr 0775 system system
+    mkdir /dev/socket/pdx/system/vr/display 0775 system system
+    mkdir /dev/socket/pdx/system/vr/pose 0775 system system
+    mkdir /dev/socket/pdx/system/vr/sensors 0775 system system
 
     # See storage config details at http://source.android.com/tech/storage/
     mkdir /mnt/shell/emulated 0700 shell shell
@@ -87,6 +172,10 @@ on post-fs-data
     write /data/vendor/log/hwc_error_log.txt ""
     mkdir /data/vendor/log/cbd 0771 system radio
     mkdir /data/vendor/log/cbd/err 0771 system radio
+    mkdir /data/dalvik-cache 0771 system system
+    mkdir /data/dalvik-cache/arm64 0771 system system
+    mkdir /data/dalvik-cache/arm 0771 system system
+    mkdir /data/dalvik-cache/profiles 0771 system system
     rm /data/vendor/log/cbd/err/last_sr_info_umts
     write /data/vendor/log/cbd/err/last_sr_info_umts ""
 
@@ -107,6 +196,12 @@ on boot
     # Allow to access debugfs for system:system
 	chmod 755 /sys/kernel/debug
     chown system system /sys/kernel/debug
+    # GPU and ION permissions
+    chmod 0666 /dev/mali0
+    chown system system /dev/mali0
+    chmod 0666 /dev/ion
+    chown system system /dev/ion
+
 #   setprop ro.radio.noril yes
 	
 	# Set permissions for ttysac2

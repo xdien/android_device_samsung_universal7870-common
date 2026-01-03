@@ -19,8 +19,62 @@
 #include <sys/types.h>
 
 #include <linux/videodev2.h>
+#include <cstddef>
 
-#include <hardware/exynos/ion.h>
+// #include <hardware/exynos/ion.h>
+// #include <linux/ion.h>
+#include <ion/ion.h>
+
+#ifndef EXYNOS_ION_HEAP_SYSTEM_MASK
+#define EXYNOS_ION_HEAP_SYSTEM_MASK (1 << 0)
+#endif
+
+#include <dlfcn.h>
+#include <log/log.h> // Ensure LOG macros are available
+
+#ifndef EXYNOS_ION_HEAP_SYSTEM_MASK
+#define EXYNOS_ION_HEAP_SYSTEM_MASK (1 << 0)
+#endif
+
+static int (*ptr_exynos_ion_open)(void) = NULL;
+static int (*ptr_exynos_ion_close)(int) = NULL;
+static int (*ptr_exynos_ion_alloc)(int, size_t, unsigned int, unsigned int) = NULL;
+
+static void load_exynos_ion_lib() {
+    static bool loaded = false;
+    if (loaded) return;
+    
+    void *handle = dlopen("libion_exynos.so", RTLD_NOW);
+    if (handle) {
+        ptr_exynos_ion_open = (int (*)(void))dlsym(handle, "exynos_ion_open");
+        ptr_exynos_ion_close = (int (*)(int))dlsym(handle, "exynos_ion_close");
+        ptr_exynos_ion_alloc = (int (*)(int, size_t, unsigned int, unsigned int))dlsym(handle, "exynos_ion_alloc");
+        loaded = true;
+        // ALOGD("Loaded libion_exynos.so successfully");
+    } else {
+        // ALOGE("Failed to dlopen libion_exynos.so");
+    }
+}
+
+extern "C" {
+
+int exynos_ion_open() {
+    load_exynos_ion_lib();
+    if (ptr_exynos_ion_open) return ptr_exynos_ion_open();
+    return -1;
+}
+
+int exynos_ion_close(int fd) {
+    if (ptr_exynos_ion_close) return ptr_exynos_ion_close(fd);
+    return -1;
+}
+
+int exynos_ion_alloc(int fd, size_t len, unsigned int mask, unsigned int flags) {
+    if (ptr_exynos_ion_alloc) return ptr_exynos_ion_alloc(fd, len, mask, flags);
+    return -1;
+}
+
+}
 #include <system/graphics.h>
 
 #include <ExynosJpegEncoderForCamera.h>

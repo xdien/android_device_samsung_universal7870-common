@@ -1,0 +1,21 @@
+# A600FJXU9CVB1
+
+# Driver deamon
+vendor/bin/mcDriverDaemon
+
+# MC Client
+vendor/lib/libMcClient.so
+vendor/lib/libMcRegistry.so
+
+
+
+# ###FILE###:proprietary-files_a6lte_bsp.txt
+# A600FJXU9CVB1
+# we need external display destructor in libhwc2on1adapter.so
+# _ZN7android14HWC2On1Adapter22destroyExternalDisplayEv
+# vendor/lib/libhwc2on1adapter.so
+# vendor/lib/libhwc2onfbadapter.so
+
+
+
+

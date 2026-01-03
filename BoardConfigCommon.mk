@@ -31,19 +31,12 @@ TARGET_SOC := exynos7870
 include hardware/samsung_slsi-linaro/config/BoardConfig7870.mk
 
 # Architecture
-TARGET_ARCH := arm64
+# Architecture
+TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv8-a
-TARGET_CPU_ABI := arm64-v8a
-TARGET_CPU_ABI2 :=
+TARGET_CPU_ABI := armeabi-v7a
+TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a53
-TARGET_CPU_VARIANT_RUNTIME := cortex-a53
-
-TARGET_2ND_ARCH := arm
-TARGET_2ND_ARCH_VARIANT := armv8-a
-TARGET_2ND_CPU_ABI := armeabi-v7a
-TARGET_2ND_CPU_ABI2 := armeabi
-TARGET_2ND_CPU_VARIANT := cortex-a53
-TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a53
 
 # Binder
 TARGET_BOARD_SUFFIX := _64
@@ -54,8 +47,11 @@ BUILD_BROKEN_USES_BUILD_COPY_HEADERS := true
 # Extracted with libbootimg
 BOARD_CUSTOM_BOOTIMG := true
 BOARD_CUSTOM_BOOTIMG_MK := hardware/samsung/mkbootimg.mk
-BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --tags_offset 0x00000100
-BOARD_KERNEL_CMDLINE := androidboot.wificountrycode=00
+BOARD_AVB_ENABLE := false
+BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x02300000 --tags_offset 0x00000100 --board SRPRA31B009KU
+BOARD_KERNEL_SECOND_OFFSET := 0x00f00000
+# SELinux
+BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive enforcing=0
 BOARD_KERNEL_BASE := 0x10000000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_KERNEL_IMAGE_NAME := Image
@@ -180,8 +176,30 @@ BOARD_VNDK_VERSION := current
 BOARD_USES_VENDORIMAGE := true
 
 # Shim
-TARGET_LD_SHIM_LIBS += \
-    /system/bin/mediaserver|/system/lib/libstagefright_shim.so
+# TARGET_LD_SHIM_LIBS += \
+#    /system/bin/mediaserver|/system/lib/libstagefright_shim.so
+
+BOARD_HAVE_SAMSUNG_WIFI := true
+# Graphics
+TARGET_USES_HWC2 := true
+TARGET_USES_ION := true
+TARGET_ADDITIONAL_GRALLOC_10_USAGE_BITS := 0x40000000000000
+TARGET_DISABLE_TRIPLE_BUFFERING := false
+BOARD_USE_LEGACY_UI := true
 
 # Wifi
-BOARD_HAVE_SAMSUNG_WIFI := true
+BOARD_WLAN_DEVICE := bcmdhd
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+BOARD_HOSTAPD_DRIVER := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB := lib_driver_cmd_bcmdhd
+WIFI_DRIVER_FW_PATH_PARAM := "/sys/module/dhd/parameters/firmware_path"
+WIFI_DRIVER_NVRAM_PATH_PARAM := "/sys/module/dhd/parameters/nvram_path"
+WIFI_DRIVER_FW_PATH_STA := "/vendor/etc/wifi/bcmdhd_sta.bin"
+WIFI_DRIVER_FW_PATH_AP := "/vendor/etc/wifi/bcmdhd_apsta.bin"
+
+# Bluetooth
+BOARD_HAVE_BLUETOOTH := true
+BOARD_HAVE_BLUETOOTH_BCM := true
+BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/samsung/universal7870-common/bluetooth

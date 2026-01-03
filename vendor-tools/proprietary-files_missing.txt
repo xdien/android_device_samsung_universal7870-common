@@ -1,0 +1,7 @@
+vendor/lib/egl/libGLES_mali.so
+vendor/lib/libsec-ril.so
+vendor/lib/libsec-ril-dsds.so
+vendor/lib/libsnap_compute.so
+vendor/lib/libOpenCv.camera.samsung.so
+vendor/lib/libsnap_caffe.so
+vendor/lib/libwvhidl.so
