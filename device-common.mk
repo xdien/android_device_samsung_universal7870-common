@@ -22,6 +22,7 @@ TARGET_BOOTANIMATION_TEXTURE_CACHE := true
 
 # OTA
 PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := true
+PRODUCT_SHIPPING_API_LEVEL := 26
 
 PRODUCT_ENFORCE_RRO_TARGETS := \
     framework-res
@@ -95,7 +96,7 @@ else ifeq ($(TARGET_DEVICE_HAS_SEC_AUDIO_HAL),true)
 #    libaudioroute_sec_helper    
 else
 PRODUCT_PACKAGES += \
-    audio.primary.exynos7870
+#    audio.primary.exynos7870
 
 ifeq ($(TARGET_DEVICE_HAS_OSS_AUDIO_HAL),true)
 # PRODUCT_PACKAGES += \
@@ -119,12 +120,14 @@ endif
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/audio_effects.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_effects.xml \
-    frameworks/av/services/audiopolicy/config/a2dp_in_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/a2dp_in_audio_policy_configuration.xml \
+    $(LOCAL_PATH)/configs/audio/a2dp_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/a2dp_audio_policy_configuration.xml \
     frameworks/av/services/audiopolicy/config/bluetooth_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_audio_policy_configuration.xml \
-    frameworks/av/services/audiopolicy/config/audio_policy_volumes.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_volumes.xml \
-    frameworks/av/services/audiopolicy/config/default_volume_tables.xml:$(TARGET_COPY_OUT_VENDOR)/etc/default_volume_tables.xml \
-    frameworks/av/services/audiopolicy/config/r_submix_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/r_submix_audio_policy_configuration.xml \
-    frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml
+    $(LOCAL_PATH)/configs/audio/audio_policy_volumes.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_volumes.xml \
+    $(LOCAL_PATH)/configs/audio/default_volume_tables.xml:$(TARGET_COPY_OUT_VENDOR)/etc/default_volume_tables.xml \
+    $(LOCAL_PATH)/configs/audio/r_submix_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/r_submix_audio_policy_configuration.xml \
+    $(LOCAL_PATH)/configs/audio/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml \
+    $(LOCAL_PATH)/configs/audio/mixer_paths.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths.xml \
+    $(LOCAL_PATH)/configs/audio/mixer_gains.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_gains.xml
 
 # Camera
 PRODUCT_PACKAGES += \
@@ -133,11 +136,11 @@ PRODUCT_PACKAGES += \
     android.hardware.camera.provider@2.4-service \
     libion_exynos \
     libstagefright_shim \
-    camera.exynos7870 \
+    camera.samsungexynos7870 \
     libcamera_metadata_helper \
-    libcsc \
-    libhwjpeg \
-    libacryl \
+#    libcsc \
+#    libhwjpeg \
+#    libacryl \
     libgiantmscl \
     libGrallocWrapper \
     Camera2
@@ -148,7 +151,7 @@ PRODUCT_PACKAGES += \
     
 # OMX
 PRODUCT_PACKAGES += \
-    libstagefrighthw \
+#    libstagefrighthw \
     libExynosOMX_Core \
     libExynosOMX_Resourcemanager \
     libOMX.Exynos.AVC.Decoder \
@@ -229,7 +232,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
    android.hardware.memtrack@1.0-impl \
    android.hardware.memtrack@1.0-service \
-   memtrack.exynos7870
+#    memtrack.exynos7870
 
 # Configstore
 PRODUCT_PACKAGES += \
@@ -430,8 +433,11 @@ PRODUCT_PACKAGES += \
     vendor.lineage.trust@1.0-service
 
 # Shims
-# PRODUCT_PACKAGES += \
-#     libexynoscamera_shim \
+PRODUCT_PACKAGES += \
+    libexynoscamera_shim \
+    libion_camerashim \
+#     libstagefright_shim \
+#     libcutils_shim_vendor
 #     libstagefright_shim \
 #     libcutils_shim_vendor
 
@@ -473,6 +479,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libnl
 
+# Create symlink for camera HAL to match ro.hardware
+PRODUCT_PACKAGES += \
+    camera.samsungexynos7870
+
 # Properties
 -include $(LOCAL_PATH)/vendor_prop.mk
     
@@ -484,7 +494,33 @@ $(call inherit-product, vendor/samsung/universal7870-common/universal7870-common
 # Manually added blobs for 32-bit compatibility
 PRODUCT_COPY_FILES += \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/libion_exynos.so:$(TARGET_COPY_OUT_VENDOR)/lib/libion_exynos.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libstagefrighthw.so:$(TARGET_COPY_OUT_VENDOR)/lib/libstagefrighthw.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libexynoscamera.so:$(TARGET_COPY_OUT_VENDOR)/lib/libexynoscamera.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libexynoscamera3.so:$(TARGET_COPY_OUT_VENDOR)/lib/libexynoscamera3.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libstainkiller.so:$(TARGET_COPY_OUT_VENDOR)/lib/libstainkiller.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libuniplugin.so:$(TARGET_COPY_OUT_VENDOR)/lib/libuniplugin.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libsensorlistener.so:$(TARGET_COPY_OUT_VENDOR)/lib/libsensorlistener.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/camera.vendor.exynos7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/camera.vendor.exynos7870.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libyasalgo.so:$(TARGET_COPY_OUT_VENDOR)/lib/libyasalgo.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libcsc.so:$(TARGET_COPY_OUT_VENDOR)/lib/libcsc.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libacryl.so:$(TARGET_COPY_OUT_VENDOR)/lib/libacryl.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libhwjpeg.so:$(TARGET_COPY_OUT_VENDOR)/lib/libhwjpeg.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libsensorndkbridge.so:$(TARGET_COPY_OUT_VENDOR)/lib/libsensorndkbridge.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/android.frameworks.sensorservice@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/android.frameworks.sensorservice@1.0.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libcamera_client.so:$(TARGET_COPY_OUT_VENDOR)/lib/libcamera_client.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/android.frameworks.bufferhub@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/android.frameworks.bufferhub@1.0.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libbufferhub.so:$(TARGET_COPY_OUT_VENDOR)/lib/libbufferhub.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libbufferhubqueue.so:$(TARGET_COPY_OUT_VENDOR)/lib/libbufferhubqueue.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libpdx_default_transport.so:$(TARGET_COPY_OUT_VENDOR)/lib/libpdx_default_transport.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libinput.so:$(TARGET_COPY_OUT_VENDOR)/lib/libinput.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/vendor.samsung_slsi.hardware.configstore-utils.so:$(TARGET_COPY_OUT_VENDOR)/lib/vendor.samsung_slsi.hardware.configstore-utils.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/vendor.samsung_slsi.hardware.configstore@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/vendor.samsung_slsi.hardware.configstore@1.0.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libknox_remotedesktopclient.knox.samsung.so:$(TARGET_COPY_OUT_VENDOR)/lib/libknox_remotedesktopclient.knox.samsung.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libgui.so:$(TARGET_COPY_OUT_VENDOR)/lib/libgui.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libui.so:$(TARGET_COPY_OUT_VENDOR)/lib/libui.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libexpat.so:$(TARGET_COPY_OUT_VENDOR)/lib/libexpat.so \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/libgiantmscl.so:$(TARGET_COPY_OUT_VENDOR)/lib/libgiantmscl.so \
+    device/samsung/universal7870-common/rootdir/etc/android.hardware.camera.provider@2.4-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/android.hardware.camera.provider@2.4-service.rc \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/gralloc.exynos7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/gralloc.exynos7870.so \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/android.hardware.sensors@1.0-impl.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/android.hardware.sensors@1.0-impl.so \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/android.hardware.graphics.composer@2.1-impl.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/android.hardware.graphics.composer@2.1-impl.so \
@@ -507,10 +543,44 @@ PRODUCT_COPY_FILES += \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/libmpp.so:$(TARGET_COPY_OUT_VENDOR)/lib/libmpp.so \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/libExynosHWCService.so:$(TARGET_COPY_OUT_VENDOR)/lib/libExynosHWCService.so \
     vendor/samsung/universal7870-common/proprietary/vendor/firmware/bcm4345C5_V0069.0172.hcd:$(TARGET_COPY_OUT_VENDOR)/firmware/BCM4345C5.hcd \
+    vendor/samsung/universal7870-common/proprietary/vendor/firmware/cs35l40-dsp1-spk-prot.bin:$(TARGET_COPY_OUT_VENDOR)/firmware/cs35l40-dsp1-spk-prot.bin \
+    vendor/samsung/universal7870-common/proprietary/vendor/firmware/cs35l40-dsp1-spk-prot-calib.bin:$(TARGET_COPY_OUT_VENDOR)/firmware/cs35l40-dsp1-spk-prot-calib.bin \
+    vendor/samsung/universal7870-common/proprietary/vendor/firmware/cs35l40-dsp1-spk-prot.wmfw:$(TARGET_COPY_OUT_VENDOR)/firmware/cs35l40-dsp1-spk-prot.wmfw \
+    vendor/samsung/universal7870-common/proprietary/vendor/firmware/mfc_fw.bin:$(TARGET_COPY_OUT_VENDOR)/firmware/mfc_fw.bin \
+    vendor/samsung/universal7870-common/proprietary/vendor/firmware/fimc_is_lib.bin:$(TARGET_COPY_OUT_VENDOR)/firmware/fimc_is_lib.bin \
+    vendor/samsung/universal7870-common/proprietary/vendor/firmware/setfile_2p6_front.bin:$(TARGET_COPY_OUT_VENDOR)/firmware/setfile_2p6_front.bin \
+    vendor/samsung/universal7870-common/proprietary/vendor/firmware/setfile_2p6.bin:$(TARGET_COPY_OUT_VENDOR)/firmware/setfile_2p6.bin \
     vendor/samsung/universal7870-common/proprietary/vendor/bin/hw/macloader:$(TARGET_COPY_OUT_VENDOR)/bin/hw/macloader \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/vendor.samsung.hardware.wifi@2.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/vendor.samsung.hardware.wifi@2.0.so \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/sensors.universal7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/sensors.universal7870.so \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/sensors.universal7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/sensors.exynos7870.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/memtrack.exynos7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/memtrack.exynos7870.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libbt-vendor.so:$(TARGET_COPY_OUT_VENDOR)/lib/libbt-vendor.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/bin/hw/android.hardware.bluetooth@1.0-service:$(TARGET_COPY_OUT_VENDOR)/bin/hw/android.hardware.bluetooth@1.0-service \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/android.hardware.bluetooth@1.0-impl.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/android.hardware.bluetooth@1.0-impl.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/vendor.samsung.hardware.bluetooth@2.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/vendor.samsung.hardware.bluetooth@2.0.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/audio.primary.exynos7870.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/audio.primary.exynos7870.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/bin/hw/android.hardware.audio@2.0-service:$(TARGET_COPY_OUT_VENDOR)/bin/hw/android.hardware.audio@2.0-service \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/android.hardware.audio@2.0-impl.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/android.hardware.audio@2.0-impl.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/android.hardware.audio.effect@2.0-impl.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/android.hardware.audio.effect@2.0-impl.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/vendor.samsung.hardware.audio@1.0.so:$(TARGET_COPY_OUT_VENDOR)/lib/vendor.samsung.hardware.audio@1.0.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/android.hardware.audio.common@2.0-util.so:$(TARGET_COPY_OUT_VENDOR)/lib/android.hardware.audio.common@2.0-util.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/android.hardware.audio.common-util.so:$(TARGET_COPY_OUT_VENDOR)/lib/android.hardware.audio.common-util.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libvndsecril-client.so:$(TARGET_COPY_OUT_VENDOR)/lib/libvndsecril-client.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libaudio-ril.so:$(TARGET_COPY_OUT_VENDOR)/lib/libaudio-ril.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libfloatingfeature.so:$(TARGET_COPY_OUT_VENDOR)/lib/libfloatingfeature.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libsecaudioinfo.so:$(TARGET_COPY_OUT_VENDOR)/lib/libsecaudioinfo.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libsamsungDiamondVoice.so:$(TARGET_COPY_OUT_VENDOR)/lib/libsamsungDiamondVoice.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/librecordalive.so:$(TARGET_COPY_OUT_VENDOR)/lib/librecordalive.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libpreprocessing_nxp.so:$(TARGET_COPY_OUT_VENDOR)/lib/libpreprocessing_nxp.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libSamsungPostProcessConvertor.so:$(TARGET_COPY_OUT_VENDOR)/lib/libSamsungPostProcessConvertor.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libtinyalsa.so:$(TARGET_COPY_OUT_VENDOR)/lib/libtinyalsa.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libaudioroute.so:$(TARGET_COPY_OUT_VENDOR)/lib/libaudioroute.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libtinycompress.so:$(TARGET_COPY_OUT_VENDOR)/lib/libtinycompress.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/libaudioutils.so:$(TARGET_COPY_OUT_VENDOR)/lib/libaudioutils.so \
+    vendor/samsung/universal7870-common/proprietary/vendor/lib/hw/vendor.samsung.hardware.audio@1.0-impl.so:$(TARGET_COPY_OUT_VENDOR)/lib/hw/vendor.samsung.hardware.audio@1.0-impl.so \
+    device/samsung/universal7870-common/configs/init/android.hardware.audio@2.0-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/android.hardware.audio@2.0-service.rc \
+    device/samsung/universal7870-common/configs/init/android.hardware.bluetooth@1.0-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/android.hardware.bluetooth@1.0-service.rc \
     vendor/samsung/universal7870-common/proprietary/vendor/lib/libwifi-hal.so:$(TARGET_COPY_OUT_VENDOR)/lib/libwifi-hal.so \
     vendor/samsung/universal7870-common/proprietary/vendor/bin/hw/android.hardware.sensors@1.0-service:$(TARGET_COPY_OUT_VENDOR)/bin/hw/android.hardware.sensors@1.0-service \
     vendor/samsung/universal7870-common/proprietary/vendor/etc/init/android.hardware.sensors@1.0-service.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/android.hardware.sensors@1.0-service.rc \
@@ -532,16 +602,4 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     ro.adb.secure=0 \
     ro.secure=0 \
     ro.debuggable=1 \
-    debug.hwc.force_gpu=1 \
-    ro.surface_flinger.protected_contents=false \
-    ro.surface_flinger.has_wide_color_display=false \
-    ro.surface_flinger.use_color_management=false \
-    ro.surface_flinger.has_HDR_display=false \
-    debug.sf.enable_hwc_vds=0 \
-    debug.sf.latch_unsignaled=1 \
-    debug.egl.swapinterval=0 \
-    debug.sf.disable_client_composition_cache=1 \
-    debug.sf.disable_hwc_overlays=1 \
-    debug.renderengine.backend=threaded \
-    ro.control_privapp_permissions=disable \
-    debug.hwui.renderer=skiagl
+    ro.control_privapp_permissions=disable
