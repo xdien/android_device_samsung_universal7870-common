@@ -1,0 +1,8 @@
+cc_library_shared {
+    name: "libexynoscamera_shim",
+    srcs: ["camera_shim.cpp"],
+    shared_libs: ["libutils"],
+    vendor: true,
+    ldflags: ["-Wl,--no-gc-sections"],
+    cflags: ["-fvisibility=default"],
+}
