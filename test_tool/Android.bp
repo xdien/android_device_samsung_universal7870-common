@@ -1,0 +1,7 @@
+cc_binary {
+    name: "test_dlopen",
+    srcs: ["test_dlopen.c"],
+    vendor: true,
+    compile_multilib: "32",
+    shared_libs: ["libdl"],
+}
