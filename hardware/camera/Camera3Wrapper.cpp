@@ -18,6 +18,8 @@
 
 #define LOG_TAG "Camera3Wrapper"
 #include <cutils/log.h>
+#include <stdint.h>
+#include <system/graphics.h>
 
 #include "CameraWrapper.h"
 #include "Camera3Wrapper.h"
@@ -35,19 +37,34 @@ typedef struct wrapper_camera3_device {
 
 #define CAMERA_ID(device) (((wrapper_camera3_device_t *)(device))->id)
 
+#include <dlfcn.h>
+
 static camera_module_t *gVendorModule = 0;
 
 static int check_vendor_module()
 {
     int rv = 0;
-    ALOGV("%s", __FUNCTION__);
 
     if(gVendorModule)
         return 0;
 
-    rv = hw_get_module_by_class("camera", "vendor", (const hw_module_t **)&gVendorModule);
-    if (rv)
-        ALOGE("failed to open vendor camera module");
+    void *handle = dlopen("/vendor/lib/hw/camera.vendor.exynos7870.so", RTLD_NOW);
+    if (!handle) {
+        handle = dlopen("camera.vendor.exynos7870.so", RTLD_NOW);
+    }
+
+    if (handle) {
+        gVendorModule = (camera_module_t *)dlsym(handle, "HMI");
+        if (!gVendorModule) {
+            ALOGE("failed to find HMI symbol in vendor camera module");
+            rv = -EINVAL;
+        } else {
+            ALOGI("loaded vendor camera module");
+        }
+    } else {
+        ALOGE("failed to open vendor camera module: %s", dlerror());
+        rv = -EINVAL;
+    }
     return rv;
 }
 
@@ -66,6 +83,8 @@ static int camera3_initialize(const camera3_device_t *device, const camera3_call
     return VENDOR_CALL(device, initialize, callback_ops);
 }
 
+#include <vector>
+
 static int camera3_configure_streams(const camera3_device *device, camera3_stream_configuration_t *stream_list)
 {
     ALOGV("%s->%zu->%zu", __FUNCTION__, (uintptr_t)device,
@@ -74,7 +93,62 @@ static int camera3_configure_streams(const camera3_device *device, camera3_strea
     if (!device)
         return -1;
 
-    return VENDOR_CALL(device, configure_streams, stream_list);
+    std::vector<android_dataspace_t> original_dataspaces;
+
+    if (stream_list) {
+        original_dataspaces.resize(stream_list->num_streams);
+        ALOGE("configure_streams: num_streams=%d, operation_mode=%d", stream_list->num_streams, stream_list->operation_mode);
+        
+        for (uint32_t i = 0; i < stream_list->num_streams; i++) {
+            camera3_stream_t *stream = stream_list->streams[i];
+            if (stream) {
+                // Save original dataspace
+                original_dataspaces[i] = stream->data_space;
+
+                ALOGE("  Stream[%d]: type=%d, width=%d, height=%d, format=0x%x, usage=0x%x, rotation=%d, data_space=%d (original)",
+                    i, stream->stream_type, stream->width, stream->height, stream->format, stream->usage, stream->rotation, stream->data_space);
+                
+                // SHIM 1: Clear dataspace to prevent HAL crash at 0x8C20000
+                if (stream->data_space != 0) {
+                    ALOGE("  Shim: Clearing data_space 0x%x -> 0 for HAL", stream->data_space);
+                    stream->data_space = (android_dataspace_t)0;
+                }
+                
+                // SHIM 2: Format & Usage fixes
+                // Strategy: Use format 0x22 (impl def) which is standard, but try to play nice with usage.
+                // Revert forced 0x11/0x23 from previous attempts to start clean with Dataspace/Buffer shim.
+                // However, if we need to force usage flags, do it here.
+                
+                // if (stream->format == 0x22) { ... }
+            }
+        }
+    }
+
+    int ret = VENDOR_CALL(device, configure_streams, stream_list);
+    ALOGE("configure_streams ret=%d", ret);
+
+    // POST-CALL FIXES
+    if (ret == 0 && stream_list) {
+        for (uint32_t i = 0; i < stream_list->num_streams; i++) {
+            camera3_stream_t *stream = stream_list->streams[i];
+             if (stream) {
+                // RESTORE DATASPACE
+                // TEST: Do NOT restore dataspace to see if Framework accepts override (and to prevent HAL crash)
+                // if (stream->data_space != original_dataspaces[i]) {
+                //      ALOGE("  Shim: Restoring data_space 0 -> 0x%x for Framework", original_dataspaces[i]);
+                //      stream->data_space = original_dataspaces[i];
+                // }
+
+                // FIX MAX BUFFERS
+                if (stream->max_buffers == 0) {
+                    ALOGE("  Shim: HAL returned max_buffers=0 for stream %d. Forcing to 4.", i);
+                    stream->max_buffers = 4;
+                }
+             }
+        }
+    }
+
+    return ret;
 }
 
 __unused static int camera3_register_stream_buffers(const camera3_device *device, const camera3_stream_buffer_set_t *buffer_set)
@@ -101,8 +175,12 @@ static const camera_metadata_t *camera3_construct_default_request_settings(const
 
 static int camera3_process_capture_request(const camera3_device_t *device, camera3_capture_request_t *request)
 {
-    ALOGV("%s->%zu->%zu", __FUNCTION__, (uintptr_t)device,
-        (uintptr_t)(((wrapper_camera3_device_t*)device)->vendor));
+    // Debug logging enabled to diagnose No Preview issue
+    if (request) {
+         ALOGE("process_capture_request: frame=%d, out_bufs=%d, stream[0]=%p", 
+             request->frame_number, request->num_output_buffers, 
+             (request->num_output_buffers > 0 && request->output_buffers) ? request->output_buffers[0].stream : NULL);
+    }
 
     if (!device)
         return -1;

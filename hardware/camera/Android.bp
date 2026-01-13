@@ -1,5 +1,5 @@
 cc_library_shared {
-    name: "camera.exynos7870",
+    name: "camera.samsungexynos7870",
     vendor: true,
     compile_multilib: "32",
     relative_install_path: "hw",
@@ -30,6 +30,7 @@ cc_library_shared {
         "android.hidl.token@1.0-utils",
         "android.hardware.graphics.bufferqueue@1.0",
         "android.hardware.graphics.bufferqueue@2.0",
+        "libexynoscamera_shim",
     ],
 
     static_libs: [

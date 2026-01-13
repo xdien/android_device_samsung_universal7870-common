@@ -41,15 +41,30 @@ static int camera_init();
 static int check_vendor_module()
 {
     android_fdsan_set_error_level(ANDROID_FDSAN_ERROR_LEVEL_DISABLED);
+    #include <dlfcn.h>
     int rv = 0;
     ALOGV("%s", __FUNCTION__);
 
     if(gVendorModule)
         return 0;
 
-    rv = hw_get_module_by_class("camera", "vendor", (const hw_module_t **)&gVendorModule);
-    if (rv)
-        ALOGE("failed to open vendor camera module");
+    void *handle = dlopen("/vendor/lib/hw/camera.vendor.exynos7870.so", RTLD_NOW);
+    if (!handle) {
+        handle = dlopen("camera.vendor.exynos7870.so", RTLD_NOW);
+    }
+
+    if (handle) {
+        gVendorModule = (camera_module_t *)dlsym(handle, "HMI");
+        if (!gVendorModule) {
+            ALOGE("failed to find HMI symbol in vendor camera module");
+            rv = -EINVAL;
+        } else {
+            ALOGI("loaded vendor camera module");
+        }
+    } else {
+        ALOGE("failed to open vendor camera module: %s", dlerror());
+        rv = -EINVAL;
+    }
     return rv;
 }
 
